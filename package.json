@@ -1,0 +1,22 @@
+{
+  "name": "xeue-sql",
+  "version": "1.0.0",
+  "description": "Simple class for connecting to mariaDB",
+  "main": "sql.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Xeue/XeueMariaDB.git"
+  },
+  "author": "Sam Chilton",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Xeue/XeueMariaDB/issues"
+  },
+  "homepage": "https://github.com/Xeue/XeueMariaDB#readme",
+  "dependencies": {
+    "mariadb": "^3.0.2"
+  }
+}
