@@ -68,7 +68,8 @@ class SQLSession {
 
 	async insert(_values, table) { // { affectedRows: 1, insertId: 1, warningStatus: 0 }
 		try {
-			const query = `INSERT INTO ${table}(${Object.keys(_values).join(',')}) values ('${Object.values(_values).join('\',\'')}')`;
+			const convertedValues = Object.values(_values).map(value => typeof value === 'string' ? `'${value}'` : value)
+			const query = `INSERT INTO ${table}(${Object.keys(_values).join(',')}) values (${convertedValues.join(',')})`;
 			const result = await this.query(query);
 			return result;
 		} catch (error) {
