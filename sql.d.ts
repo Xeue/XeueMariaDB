@@ -36,9 +36,33 @@ export class SQLSession {
         table: string
     ) {}
 
+    async get(
+        _conditions: {column:string, value:any},
+        table: string
+    ) {}
+
+    async getN(
+        _conditions: {column:string, value:any},
+        sortColumn: string,
+        limit: number
+        table: string
+    ) {}
+
+    async getLast(
+        _conditions: {column:string, value:any},
+        sortColumn: string,
+        table: string
+    ) {}
+
     async update(
         _values: {column:string, value:any},
         _conditions: {column:string, value:any},
         table: string
+    ) {}
+
+    async updateTime(
+        timeColumn: string,
+        _conditions: {column:string, value:any},
+        table :string
     ) {}
 }

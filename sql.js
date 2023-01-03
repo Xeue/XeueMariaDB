@@ -8,14 +8,18 @@ class SQLSession {
 		this.user = user;
 		this.password = password;
 		this.database = database;
-		this.pool = mariadb.createPool({
-			host: host,
-			user: user,
-			port: port,
-			password: password,
-			connectionLimit: 5
-		});
-		this.init(tableDefinitions);
+		try {
+			this.pool = mariadb.createPool({
+				host: host,
+				user: user,
+				port: port,
+				password: password,
+				connectionLimit: 5
+			});
+			this.init(tableDefinitions);
+		} catch (error) {
+			this.logger.error('Could not make connection to SQL server', error);
+		}
 	}
 
 	async init(tables) {
@@ -44,14 +48,18 @@ class SQLSession {
 	}
 
 	async tableCheck(table, tableDef, pk) {
-		const rows = await this.query(`SELECT count(*) as count
-			FROM information_schema.TABLES
-			WHERE (TABLE_SCHEMA = '${this.database}') AND (TABLE_NAME = '${table}')
-		`);
-		if (rows[0].count == 0) {
-			this.logger.log(`Table: ${table} is being created`, 'S');
-			await this.query(tableDef);
-			await this.query(`ALTER TABLE \`${table}\` MODIFY \`${pk}\` int(11) NOT NULL AUTO_INCREMENT;`);
+		try {
+			const rows = await this.query(`SELECT count(*) as count
+				FROM information_schema.TABLES
+				WHERE (TABLE_SCHEMA = '${this.database}') AND (TABLE_NAME = '${table}')
+			`);
+			if (rows[0].count == 0) {
+				this.logger.log(`Table: ${table} is being created`, 'S');
+				await this.query(tableDef);
+				await this.query(`ALTER TABLE \`${table}\` MODIFY \`${pk}\` int(11) NOT NULL AUTO_INCREMENT;`);
+			}
+		} catch (error) {
+			this.logger.error('SQL Error', error);
 		}
 	}
 
@@ -77,6 +85,74 @@ class SQLSession {
 		}
 	}
 
+	async get(_conditions, table) {
+		try {
+			let where = '';
+			if (_conditions === '') _conditions = undefined;
+			switch (typeof _conditions) {
+			case 'undefined':
+				where = '';
+				break;
+			case 'string':
+				where = 'WHERE '+_conditions;
+				break;
+			case 'object':
+				if (!Array.isArray(_conditions)) {	
+					let whereArr = [];
+					for (const key in _conditions) {
+						if (Object.hasOwnProperty.call(_conditions, key)) {
+							whereArr.push(`\`${key}\` = '${_conditions[key]}'`)
+						}
+					}
+					_conditions = whereArr;
+				}
+				where = 'WHERE '+_conditions.join(' and ');
+				break;
+			}
+			const query = `SELECT * FROM ${table} ${where}`;
+			const result = await this.query(query);
+			return result;
+		} catch (error) {
+			this.logger.error('SQL Error', error);
+		}
+	}
+
+	async getN(_conditions, sortColumn, limit, table) {
+		try {
+			let where = '';
+			if (_conditions === '') _conditions = undefined;
+			switch (typeof _conditions) {
+			case 'undefined':
+				where = '';
+				break;
+			case 'string':
+				where = 'WHERE '+_conditions;
+				break;
+			case 'object':
+				if (!Array.isArray(_conditions)) {	
+					let whereArr = [];
+					for (const key in _conditions) {
+						if (Object.hasOwnProperty.call(_conditions, key)) {
+							whereArr.push(`\`${key}\` = '${_conditions[key]}'`)
+						}
+					}
+					_conditions = whereArr;
+				}
+				where = 'WHERE '+_conditions.join(' and ');
+				break;
+			}
+			const query = `SELECT * FROM ${table} ${where} ORDER BY ${sortColumn} DESC LIMIT ${limit}`;
+			return await this.query(query);
+		} catch (error) {
+			this.logger.error('SQL Error', error);
+		}
+	}
+
+	async getLast(_conditions, sortColumn, table) {
+		const [result] = await getN(_conditions, sortColumn, 1, table);
+		return result;
+	}
+
 	async update(_values, _conditions, table) {
 		try {
 			let where = '';
@@ -88,13 +164,55 @@ class SQLSession {
 				where = 'WHERE '+_conditions;
 				break;
 			case 'object':
+				if (!Array.isArray(_conditions)) {	
+					let whereArr = [];
+					for (const key in _conditions) {
+						if (Object.hasOwnProperty.call(_conditions, key)) {
+							whereArr.push(`\`${key}\` = '${_conditions[key]}'`)
+						}
+					}
+					_conditions = whereArr;
+				}
 				where = 'WHERE '+_conditions.join(' and ');
 				break;
 			default:
 				break;
 			}
-			const values = Object.keys(_values).map(key => `${key} = ${_values[key]}`).join(',');
+			const values = Object.keys(_values).map(key => `\`${key}\` = ${_values[key]}`).join(',');
 			const query = `UPDATE ${table} SET ${values} ${where}`;
+			const result = await this.query(query);
+			return result;
+		} catch (error) {
+			this.logger.error('SQL Error', error);
+		}
+	}
+
+	async updateTime(timeColumn, _conditions, table) {
+		try {
+			let where = '';
+			switch (typeof _conditions) {
+			case 'undefined':
+				where = '';
+				break;
+			case 'string':
+				where = 'WHERE '+_conditions;
+				break;
+			case 'object':
+				if (!Array.isArray(_conditions)) {	
+					let whereArr = [];
+					for (const key in _conditions) {
+						if (Object.hasOwnProperty.call(_conditions, key)) {
+							whereArr.push(`\`${key}\` = '${_conditions[key]}'`)
+						}
+					}
+					_conditions = whereArr;
+				}
+				where = 'WHERE '+_conditions.join(' and ');
+				break;
+			default:
+				break;
+			}
+			const query = `UPDATE ${table} SET \`${timeColumn}\` = NOW() ${where}`;
 			const result = await this.query(query);
 			return result;
 		} catch (error) {
