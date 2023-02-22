@@ -155,6 +155,19 @@ class SQLSession {
 	}
 
 	async update(_values, _conditions, table) {
+		function sanitise(value) {
+			switch (typeof value) {
+				case 'number':
+				case 'bigint':
+				case 'boolean':
+					return Number(value);
+				case 'string':
+					return `'${value}'`;
+				default:
+					return value;
+			}
+		}
+
 		try {
 			let where = '';
 			switch (typeof _conditions) {
@@ -179,7 +192,7 @@ class SQLSession {
 			default:
 				break;
 			}
-			const values = Object.keys(_values).map(key => `\`${key}\` = ${_values[key]}`).join(',');
+			const values = Object.keys(_values).map(key => `\`${key}\` = ${sanitise(_values[key])}`).join(',');
 			const query = `UPDATE ${table} SET ${values} ${where}`;
 			const result = await this.query(query);
 			return result;
