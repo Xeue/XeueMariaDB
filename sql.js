@@ -37,9 +37,10 @@ class SQLSession {
 			this.logger.log(`Could not check for or create the required database: ${this.database}`, 'E');
 		}
 		try {
-			tables.forEach(async table => {
+			for (let index = 0; index < tables.length; index++) {
+				const table = tables[index];
 				await this.tableCheck(table.name, table.definition, table.PK);
-			});
+			}
 		} catch (error) {
 			this.logger.log('Could not check for or create the required tables', 'E');
 		}
@@ -55,6 +56,7 @@ class SQLSession {
 			if (rows[0].count == 0) {
 				this.logger.log(`Table: ${table} is being created`, 'S');
 				await this.query(tableDef);
+				await this.query(`ALTER TABLE \`${table}\` ADD PRIMARY KEY (\`${pk}\`);`)
 				await this.query(`ALTER TABLE \`${table}\` MODIFY \`${pk}\` int(11) NOT NULL AUTO_INCREMENT;`);
 			}
 		} catch (error) {
