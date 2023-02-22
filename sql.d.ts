@@ -7,12 +7,7 @@ export class SQLSession {
         username: string,
         password: string,
         databaseName: string,
-        logger: Object,
-        definitions: [{
-            name: string,
-            definition: string,
-            PK: string
-        }]
+        logger: Object
     ) {}
 
     async init(table: [{

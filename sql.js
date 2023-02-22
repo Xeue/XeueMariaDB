@@ -1,7 +1,7 @@
 const mariadb = require('mariadb');
 
 class SQLSession {
-	constructor(host, port, user, password, database, logger, tableDefinitions) {
+	constructor(host, port, user, password, database, logger) {
 		this.logger = logger;
 		this.host = host;
 		this.port = port;
@@ -16,7 +16,6 @@ class SQLSession {
 				password: password,
 				connectionLimit: 5
 			});
-			this.init(tableDefinitions);
 		} catch (error) {
 			this.logger.error('Could not make connection to SQL server', error);
 		}
