@@ -65,14 +65,16 @@ class SQLSession {
 	}
 
 	async query(query) {
-		const conn = await this.pool.getConnection();
+		let conn;
 		try {
+			conn = await this.pool.getConnection();
 			const rows = await conn.query(query);
+			conn.end()
 			return rows;
 		} catch (error) {
 			this.logger.error('SQL Error', error);
+			conn.end();
 		}
-		conn.end();
 	}
 
 	async insert(_values, table) { // { affectedRows: 1, insertId: 1, warningStatus: 0 }
