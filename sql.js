@@ -150,7 +150,7 @@ class SQLSession {
 	}
 
 	async getLast(_conditions, sortColumn, table) {
-		const [result] = await getN(_conditions, sortColumn, 1, table);
+		const [result] = await this.getN(_conditions, sortColumn, 1, table);
 		return result;
 	}
 
