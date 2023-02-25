@@ -1,6 +1,6 @@
 {
   "name": "xeue-sql",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Simple class for connecting to mariaDB",
   "main": "sql.js",
   "scripts": {
