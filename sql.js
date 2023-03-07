@@ -25,6 +25,7 @@ class SQLSession {
 		this.logger.log('Initialising SQL database', 'S');
 		try {
 			await this.query(`CREATE DATABASE IF NOT EXISTS ${this.database};`);
+			this.pool.end();
 			this.pool = mariadb.createPool({
 				host: this.host,
 				user: this.user,
