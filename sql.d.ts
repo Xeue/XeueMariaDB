@@ -39,7 +39,7 @@ export class SQLSession {
     async getN(
         _conditions: {column:string, value:any},
         sortColumn: string,
-        limit: number
+        limit: number,
         table: string
     ) {}
 
